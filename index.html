@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>文章发布与留言板（图片预览版）</title>
+<title>文章发布与留言板（模拟登录版）</title>
 <style>
   body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f9; color:#000; }
   header { background:#333; color:#fff; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; }
@@ -59,13 +59,24 @@ const postsDiv = document.getElementById("posts");
 const previewDiv = document.getElementById("preview");
 let loggedIn = false;
 
-function toggleDropdown(){ loginBox.style.display = loginBox.style.display==="block"?"none":"block"; }
+// 模拟账号密码
+const USER_ACCOUNT = { username:"admin", password:"123456" };
+
+function toggleDropdown(){ 
+  loginBox.style.display = loginBox.style.display==="block"?"none":"block"; 
+}
 
 function login(){
   const u=document.getElementById("username").value;
   const p=document.getElementById("password").value;
-  if(u&&p){ alert("登录成功:"+u); loginBox.style.display="none"; postForm.style.display="block"; loggedIn=true;} 
-  else alert("请输入账号和密码");
+  if(u===USER_ACCOUNT.username && p===USER_ACCOUNT.password){
+    alert("登录成功: "+u);
+    loginBox.style.display="none";
+    postForm.style.display="block";
+    loggedIn=true;
+  } else {
+    alert("账号或密码错误");
+  }
 }
 
 // 预览图片
