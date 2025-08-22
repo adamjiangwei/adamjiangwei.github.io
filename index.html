@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>阿当的留言板</title>
+<title>文章发布与留言板（匿名留言版）</title>
 <style>
   body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f9; color:#000; }
   header { background:#333; color:#fff; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; }
@@ -79,7 +79,7 @@ function login(){
   }
 }
 
-// 预览图片
+// 图片预览
 document.getElementById("fileInput").addEventListener("change", function(){
   previewDiv.innerHTML="";
   Array.from(this.files).forEach(f=>{
@@ -122,6 +122,31 @@ function savePost(content, attachments){
   renderPosts();
 }
 
+// 添加匿名留言
+function addComment(time){
+  let input=document.getElementById("cmt-"+time);
+  let txt=input.value.trim();
+  if(!txt) return;
+
+  let randName = "游客" + Math.floor(Math.random()*9000+1000);
+  let ip = "127.0.0.1"; // 模拟IP
+  let commentObj = {
+    name: randName,
+    ip: ip,
+    time: new Date().toLocaleString(),
+    text: txt
+  };
+
+  let posts=JSON.parse(localStorage.getItem("posts")||"[]");
+  let post=posts.find(p=>p.time===time);
+  if(post){ 
+    post.comments.push(commentObj); 
+    localStorage.setItem("posts",JSON.stringify(posts)); 
+    renderPosts(); 
+  }
+}
+
+// 渲染文章与留言
 function renderPosts(){
   postsDiv.innerHTML="";
   let posts=JSON.parse(localStorage.getItem("posts")||"[]");
@@ -138,47 +163,4 @@ function renderPosts(){
       </div>
       <time>${new Date(post.time).toLocaleString()}</time>
       <div class="actions">
-        <button class="edit" onclick="editPost(${post.time})">编辑</button>
-        <button class="delete" onclick="deletePost(${post.time})">删除</button>
-      </div>
-      <div class="comments">
-        ${post.comments.map(c=>`<div class="comment">${c}</div>`).join("")}
-        <div class="comment-form">
-          <input type="text" id="cmt-${post.time}" placeholder="匿名留言">
-          <button onclick="addComment(${post.time})">提交</button>
-        </div>
-      </div>`;
-    postsDiv.appendChild(div);
-  });
-}
-
-function addComment(time){
-  let input=document.getElementById("cmt-"+time);
-  let txt=input.value.trim();
-  if(!txt) return;
-  let posts=JSON.parse(localStorage.getItem("posts")||"[]");
-  let post=posts.find(p=>p.time===time);
-  if(post){ post.comments.push(txt); localStorage.setItem("posts",JSON.stringify(posts)); renderPosts(); }
-}
-
-function deletePost(time){
-  if(!confirm("确认删除文章?")) return;
-  let posts=JSON.parse(localStorage.getItem("posts")||"[]");
-  posts=posts.filter(p=>p.time!==time);
-  localStorage.setItem("posts",JSON.stringify(posts));
-  renderPosts();
-}
-
-function editPost(time){
-  let posts=JSON.parse(localStorage.getItem("posts")||"[]");
-  let post=posts.find(p=>p.time===time);
-  if(post){
-    let newContent=prompt("编辑文章内容:",post.content);
-    if(newContent!==null){ post.content=newContent.trim(); localStorage.setItem("posts",JSON.stringify(posts)); renderPosts(); }
-  }
-}
-
-renderPosts();
-</script>
-</body>
-</html>
+        <button class="edit" onclick="editPost($
