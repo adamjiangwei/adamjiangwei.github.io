@@ -2,43 +2,38 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>Adam的小窝</title>
+<title>文章发布与留言板（图片预览版）</title>
 <style>
-  body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f9; color:#000; transition: all 0.3s; }
-  body.dark { background:#181818; color:#f0f0f0; }
-  header { background:#333; color:#fff; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; transition: all 0.3s;}
-  header.dark { background:#222; }
+  body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f9; color:#000; }
+  header { background:#333; color:#fff; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; }
   header h1 { margin:0; font-size:20px; }
   .menu { position:relative; }
-  .menu > button, #nightToggle { background:#444; color:#fff; border:none; padding:8px 12px; cursor:pointer; border-radius:4px; margin-left:5px; }
-  .dropdown { display:none; position:absolute; right:0; top:40px; background:#fff; color:#333; min-width:200px; padding:15px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.2); transition: all 0.3s; }
-  .dropdown.dark { background:#333; color:#f0f0f0; }
+  .menu > button { background:#444; color:#fff; border:none; padding:8px 12px; cursor:pointer; border-radius:4px; margin-left:5px; }
+  .dropdown { display:none; position:absolute; right:0; top:40px; background:#fff; color:#333; min-width:200px; padding:15px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.2); }
   .dropdown input { width:100%; padding:6px; margin:6px 0; border:1px solid #ccc; border-radius:4px; }
   .dropdown button { width:100%; padding:8px; background:#333; color:#fff; border:none; border-radius:4px; cursor:pointer; }
   .container { padding:20px; max-width:800px; margin:auto; }
-  #postForm { display:none; background:#fff; padding:15px; border-radius:8px; margin-bottom:20px; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s;}
-  #postForm.dark { background:#222; }
-  #postForm textarea { width:100%; height:80px; padding:10px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px; background:#fff; color:#000; }
-  #postForm.dark textarea { background:#333; color:#f0f0f0; border:1px solid #555; }
+  #postForm { display:none; background:#fff; padding:15px; border-radius:8px; margin-bottom:20px; box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+  #postForm textarea { width:100%; height:80px; padding:10px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px; }
   #postForm button { padding:8px 16px; border:none; background:#28a745; color:#fff; border-radius:4px; cursor:pointer; }
-  .post { background:#fff; padding:15px; border-radius:8px; margin-bottom:20px; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s;}
-  .post.dark { background:#222; }
+  #preview img { max-width:150px; max-height:150px; margin:5px; border-radius:6px; display:inline-block; }
+  .post { background:#fff; padding:15px; border-radius:8px; margin-bottom:20px; box-shadow:0 2px 4px rgba(0,0,0,0.1);}
   .post time { color:#888; font-size:12px; }
   .post .actions button { margin-right:6px; padding:4px 8px; font-size:12px; border:none; border-radius:4px; cursor:pointer; }
   .post .actions .delete { background:#dc3545; color:#fff; }
   .post .actions .edit { background:#ffc107; color:#000; }
+  .attachments img { max-width:200px; margin:5px; border-radius:6px; display:block; }
+  .attachments a { display:block; color:#007bff; text-decoration:none; margin:2px 0; }
   .comments { margin-top:15px; padding-top:10px; border-top:1px solid #ddd; }
   .comment { font-size:14px; padding:6px 0; border-bottom:1px dashed #ddd; }
   .comment:last-child { border-bottom:none; }
   .comment-form input { width:80%; padding:6px; border:1px solid #ccc; border-radius:4px; }
   .comment-form button { padding:6px 12px; margin-left:5px; border:none; background:#007bff; color:#fff; border-radius:4px; cursor:pointer; }
-  body.dark .comment-form input { background:#333; color:#f0f0f0; border:1px solid #555; }
-  body.dark .post time, body.dark .comment { color:#ccc; }
 </style>
 </head>
 <body>
 <header>
-  <h1>发布</h1>
+  <h1>文章发布板</h1>
   <div class="menu">
     <button onclick="toggleDropdown()">登录</button>
     <div class="dropdown" id="loginBox">
@@ -46,12 +41,13 @@
       <input type="password" id="password" placeholder="密码">
       <button onclick="login()">登录</button>
     </div>
-    <button id="nightToggle" onclick="toggleNight()">夜间模式</button>
   </div>
 </header>
 <div class="container">
   <div id="postForm">
     <textarea id="postContent" placeholder="写点什么..."></textarea><br>
+    <input type="file" id="fileInput" multiple accept="image/*,.pdf,.txt,.zip"><br>
+    <div id="preview"></div><br>
     <button onclick="publishPost()">发布</button>
   </div>
   <div id="posts"></div>
@@ -60,34 +56,75 @@
 const loginBox = document.getElementById("loginBox");
 const postForm = document.getElementById("postForm");
 const postsDiv = document.getElementById("posts");
-let darkMode = false;
+const previewDiv = document.getElementById("preview");
+let loggedIn = false;
 
 function toggleDropdown(){ loginBox.style.display = loginBox.style.display==="block"?"none":"block"; }
 
 function login(){
   const u=document.getElementById("username").value;
   const p=document.getElementById("password").value;
-  if(u&&p){ alert("登录成功:"+u); loginBox.style.display="none"; postForm.style.display="block"; } 
+  if(u&&p){ alert("登录成功:"+u); loginBox.style.display="none"; postForm.style.display="block"; loggedIn=true;} 
   else alert("请输入账号和密码");
 }
 
-function toggleNight(){
-  darkMode = !darkMode;
-  document.body.classList.toggle("dark", darkMode);
-  loginBox.classList.toggle("dark", darkMode);
-  postForm.classList.toggle("dark", darkMode);
-  Array.from(document.getElementsByClassName("post")).forEach(p=>p.classList.toggle("dark", darkMode));
+// 预览图片
+document.getElementById("fileInput").addEventListener("change", function(){
+  previewDiv.innerHTML="";
+  Array.from(this.files).forEach(f=>{
+    if(f.type.startsWith("image/")){
+      let reader = new FileReader();
+      reader.onload = e => { let img = document.createElement("img"); img.src=e.target.result; previewDiv.appendChild(img); };
+      reader.readAsDataURL(f);
+    }
+  });
+});
+
+function publishPost(){
+  if(!loggedIn){ alert("请先登录"); return; }
+  let content=document.getElementById("postContent").value.trim();
+  let files=document.getElementById("fileInput").files;
+  if(!content && !files.length) return;
+
+  let attachments=[];
+  if(files.length){
+    let count=0;
+    Array.from(files).forEach(f=>{
+      let reader=new FileReader();
+      reader.onload=function(e){
+        attachments.push({name:f.name, data:e.target.result});
+        count++;
+        if(count===files.length) savePost(content, attachments);
+      };
+      reader.readAsDataURL(f);
+    });
+  } else savePost(content, []);
 }
 
-function loadPosts(){
+function savePost(content, attachments){
+  let posts=JSON.parse(localStorage.getItem("posts")||"[]");
+  posts.unshift({content:content, time:Date.now(), comments:[], attachments:attachments});
+  localStorage.setItem("posts",JSON.stringify(posts));
+  document.getElementById("postContent").value="";
+  document.getElementById("fileInput").value="";
+  previewDiv.innerHTML="";
+  renderPosts();
+}
+
+function renderPosts(){
   postsDiv.innerHTML="";
-  let posts = JSON.parse(localStorage.getItem("posts")||"[]");
-  posts.sort((a,b)=>b.time-a.time);
+  let posts=JSON.parse(localStorage.getItem("posts")||"[]");
   posts.forEach(post=>{
-    let postDiv=document.createElement("div");
-    postDiv.className="post"+(darkMode?" dark":"");
-    postDiv.innerHTML=`
+    let div=document.createElement("div");
+    div.className="post";
+    div.innerHTML=`
       <div class="content">${post.content}</div>
+      <div class="attachments">
+        ${post.attachments.map(a=>{
+          if(a.data.startsWith("data:image")) return `<img src="${a.data}" alt="${a.name}">`;
+          else return `<a href="${a.data}" download="${a.name}">${a.name}</a>`;
+        }).join("")}
+      </div>
       <time>${new Date(post.time).toLocaleString()}</time>
       <div class="actions">
         <button class="edit" onclick="editPost(${post.time})">编辑</button>
@@ -100,18 +137,8 @@ function loadPosts(){
           <button onclick="addComment(${post.time})">提交</button>
         </div>
       </div>`;
-    postsDiv.appendChild(postDiv);
+    postsDiv.appendChild(div);
   });
-}
-
-function publishPost(){
-  let content=document.getElementById("postContent").value.trim();
-  if(!content) return;
-  let posts=JSON.parse(localStorage.getItem("posts")||"[]");
-  posts.push({content:content,time:Date.now(),comments:[]});
-  localStorage.setItem("posts",JSON.stringify(posts));
-  document.getElementById("postContent").value="";
-  loadPosts();
 }
 
 function addComment(time){
@@ -120,15 +147,15 @@ function addComment(time){
   if(!txt) return;
   let posts=JSON.parse(localStorage.getItem("posts")||"[]");
   let post=posts.find(p=>p.time===time);
-  if(post){ post.comments.push(txt); localStorage.setItem("posts",JSON.stringify(posts)); loadPosts(); }
+  if(post){ post.comments.push(txt); localStorage.setItem("posts",JSON.stringify(posts)); renderPosts(); }
 }
 
 function deletePost(time){
   if(!confirm("确认删除文章?")) return;
   let posts=JSON.parse(localStorage.getItem("posts")||"[]");
-  posts = posts.filter(p=>p.time!==time);
+  posts=posts.filter(p=>p.time!==time);
   localStorage.setItem("posts",JSON.stringify(posts));
-  loadPosts();
+  renderPosts();
 }
 
 function editPost(time){
@@ -136,11 +163,11 @@ function editPost(time){
   let post=posts.find(p=>p.time===time);
   if(post){
     let newContent=prompt("编辑文章内容:",post.content);
-    if(newContent!==null){ post.content=newContent.trim(); localStorage.setItem("posts",JSON.stringify(posts)); loadPosts(); }
+    if(newContent!==null){ post.content=newContent.trim(); localStorage.setItem("posts",JSON.stringify(posts)); renderPosts(); }
   }
 }
 
-loadPosts();
+renderPosts();
 </script>
 </body>
 </html>
