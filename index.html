@@ -1,187 +1,146 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <title>阿当的手搓简易博客</title>
-  <style>
-    body {
-      font-family: "Segoe UI", "微软雅黑", sans-serif;
-      margin: 0;
-      background: #f4f6f9;
-    }
-    header {
-      background: #3f51b5;
-      color: white;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    header h1 { margin: 0; font-size: 20px; }
-    #loginMenu { position: relative; }
-    #loginToggle {
-      background: #fff;
-      color: #3f51b5;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    #loginBox {
-      display: none;
-      position: absolute;
-      right: 0;
-      top: 40px;
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      z-index: 99;
-    }
-    input[type="text"], input[type="password"], textarea {
-      width: 100%;
-      padding: 8px;
-      margin: 6px 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      background: #3f51b5;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover { background: #2c3e9d; }
-    main { padding: 20px; max-width: 800px; margin: auto; }
-    #editor, .post {
-      background: white;
-      border-radius: 8px;
-      padding: 15px;
-      margin: 20px 0;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .post b { color: #3f51b5; }
-    .messages { margin-top: 10px; }
-    .message {
-      background: #f1f1f1;
-      border-radius: 6px;
-      padding: 6px;
-      margin-top: 6px;
-      font-size: 14px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Adam的小窝</title>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f9; color:#000; transition: all 0.3s; }
+  body.dark { background:#181818; color:#f0f0f0; }
+  header { background:#333; color:#fff; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; transition: all 0.3s;}
+  header.dark { background:#222; }
+  header h1 { margin:0; font-size:20px; }
+  .menu { position:relative; }
+  .menu > button, #nightToggle { background:#444; color:#fff; border:none; padding:8px 12px; cursor:pointer; border-radius:4px; margin-left:5px; }
+  .dropdown { display:none; position:absolute; right:0; top:40px; background:#fff; color:#333; min-width:200px; padding:15px; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.2); transition: all 0.3s; }
+  .dropdown.dark { background:#333; color:#f0f0f0; }
+  .dropdown input { width:100%; padding:6px; margin:6px 0; border:1px solid #ccc; border-radius:4px; }
+  .dropdown button { width:100%; padding:8px; background:#333; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+  .container { padding:20px; max-width:800px; margin:auto; }
+  #postForm { display:none; background:#fff; padding:15px; border-radius:8px; margin-bottom:20px; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s;}
+  #postForm.dark { background:#222; }
+  #postForm textarea { width:100%; height:80px; padding:10px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px; background:#fff; color:#000; }
+  #postForm.dark textarea { background:#333; color:#f0f0f0; border:1px solid #555; }
+  #postForm button { padding:8px 16px; border:none; background:#28a745; color:#fff; border-radius:4px; cursor:pointer; }
+  .post { background:#fff; padding:15px; border-radius:8px; margin-bottom:20px; box-shadow:0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s;}
+  .post.dark { background:#222; }
+  .post time { color:#888; font-size:12px; }
+  .post .actions button { margin-right:6px; padding:4px 8px; font-size:12px; border:none; border-radius:4px; cursor:pointer; }
+  .post .actions .delete { background:#dc3545; color:#fff; }
+  .post .actions .edit { background:#ffc107; color:#000; }
+  .comments { margin-top:15px; padding-top:10px; border-top:1px solid #ddd; }
+  .comment { font-size:14px; padding:6px 0; border-bottom:1px dashed #ddd; }
+  .comment:last-child { border-bottom:none; }
+  .comment-form input { width:80%; padding:6px; border:1px solid #ccc; border-radius:4px; }
+  .comment-form button { padding:6px 12px; margin-left:5px; border:none; background:#007bff; color:#fff; border-radius:4px; cursor:pointer; }
+  body.dark .comment-form input { background:#333; color:#f0f0f0; border:1px solid #555; }
+  body.dark .post time, body.dark .comment { color:#ccc; }
+</style>
 </head>
 <body>
-  <header>
-    <h1>阿当的手搓简易博客</h1>
-    <div id="loginMenu">
-      <button id="loginToggle" onclick="toggleLogin()">登录</button>
-      <div id="loginBox">
-        <div id="loginForm">
-          <input id="username" type="text" placeholder="账号">
-          <input id="password" type="password" placeholder="密码">
-          <button onclick="login()">登录</button>
-        </div>
-        <div id="userPanel" class="hidden">
-          欢迎，<span id="userName"></span><br>
-          <button onclick="logout()">退出</button>
-        </div>
+<header>
+  <h1>发布</h1>
+  <div class="menu">
+    <button onclick="toggleDropdown()">登录</button>
+    <div class="dropdown" id="loginBox">
+      <input type="text" id="username" placeholder="账号">
+      <input type="password" id="password" placeholder="密码">
+      <button onclick="login()">登录</button>
+    </div>
+    <button id="nightToggle" onclick="toggleNight()">夜间模式</button>
+  </div>
+</header>
+<div class="container">
+  <div id="postForm">
+    <textarea id="postContent" placeholder="写点什么..."></textarea><br>
+    <button onclick="publishPost()">发布</button>
+  </div>
+  <div id="posts"></div>
+</div>
+<script>
+const loginBox = document.getElementById("loginBox");
+const postForm = document.getElementById("postForm");
+const postsDiv = document.getElementById("posts");
+let darkMode = false;
+
+function toggleDropdown(){ loginBox.style.display = loginBox.style.display==="block"?"none":"block"; }
+
+function login(){
+  const u=document.getElementById("username").value;
+  const p=document.getElementById("password").value;
+  if(u&&p){ alert("登录成功:"+u); loginBox.style.display="none"; postForm.style.display="block"; } 
+  else alert("请输入账号和密码");
+}
+
+function toggleNight(){
+  darkMode = !darkMode;
+  document.body.classList.toggle("dark", darkMode);
+  loginBox.classList.toggle("dark", darkMode);
+  postForm.classList.toggle("dark", darkMode);
+  Array.from(document.getElementsByClassName("post")).forEach(p=>p.classList.toggle("dark", darkMode));
+}
+
+function loadPosts(){
+  postsDiv.innerHTML="";
+  let posts = JSON.parse(localStorage.getItem("posts")||"[]");
+  posts.sort((a,b)=>b.time-a.time);
+  posts.forEach(post=>{
+    let postDiv=document.createElement("div");
+    postDiv.className="post"+(darkMode?" dark":"");
+    postDiv.innerHTML=`
+      <div class="content">${post.content}</div>
+      <time>${new Date(post.time).toLocaleString()}</time>
+      <div class="actions">
+        <button class="edit" onclick="editPost(${post.time})">编辑</button>
+        <button class="delete" onclick="deletePost(${post.time})">删除</button>
       </div>
-    </div>
-  </header>
-
-  <main>
-    <!-- 发文章 -->
-    <div id="editor" class="hidden">
-      <h2>发文章</h2>
-      <textarea id="postContent" placeholder="写点什么..."></textarea><br>
-      <button onclick="addPost()">发布</button>
-    </div>
-
-    <!-- 文章列表 -->
-    <h2>文章</h2>
-    <div id="postList"></div>
-  </main>
-
-  <script>
-    const USERS = { "adam": "Aa@123456" }; // 模拟账号
-    let currentUser = null;
-
-    function toggleLogin() {
-      const box = document.getElementById("loginBox");
-      box.style.display = box.style.display === "block" ? "none" : "block";
-    }
-
-    function login() {
-      const user = document.getElementById("username").value;
-      const pass = document.getElementById("password").value;
-      if (USERS[user] && USERS[user] === pass) {
-        currentUser = user;
-        document.getElementById("loginForm").classList.add("hidden");
-        document.getElementById("userPanel").classList.remove("hidden");
-        document.getElementById("userName").innerText = user;
-        document.getElementById("editor").classList.remove("hidden");
-        document.getElementById("loginToggle").innerText = "账户";
-      } else {
-        alert("账号或密码错误！");
-      }
-    }
-
-    function logout() {
-      currentUser = null;
-      document.getElementById("loginForm").classList.remove("hidden");
-      document.getElementById("userPanel").classList.add("hidden");
-      document.getElementById("editor").classList.add("hidden");
-      document.getElementById("loginToggle").innerText = "登录";
-    }
-
-    function addPost() {
-      if (!currentUser) return;
-      const content = document.getElementById("postContent").value.trim();
-      if (!content) return;
-      const posts = JSON.parse(localStorage.getItem("posts") || "[]");
-      const id = Date.now();
-      posts.unshift({ id, user: currentUser, content, time: new Date().toLocaleString(), messages: [] });
-      localStorage.setItem("posts", JSON.stringify(posts));
-      document.getElementById("postContent").value = "";
-      renderPosts();
-    }
-
-    function addMessage(postId) {
-      const input = document.getElementById("msg-" + postId);
-      const text = input.value.trim();
-      if (!text) return;
-      const posts = JSON.parse(localStorage.getItem("posts") || "[]");
-      const post = posts.find(p => p.id === postId);
-      post.messages.unshift({ content: text, time: new Date().toLocaleString() });
-      localStorage.setItem("posts", JSON.stringify(posts));
-      input.value = "";
-      renderPosts();
-    }
-
-    function renderPosts() {
-      const posts = JSON.parse(localStorage.getItem("posts") || "[]");
-      const list = document.getElementById("postList");
-      list.innerHTML = posts.map(p => `
-        <div class="post">
-          <b>${p.user}</b> (${p.time})<br><br>${p.content}
-          <div class="messages">
-            <h4>留言</h4>
-            ${p.messages.map(m => `<div class="message">匿名 (${m.time})<br>${m.content}</div>`).join("")}
-            <textarea id="msg-${p.id}" placeholder="匿名留言..."></textarea><br>
-            <button onclick="addMessage(${p.id})">留言</button>
-          </div>
+      <div class="comments">
+        ${post.comments.map(c=>`<div class="comment">${c}</div>`).join("")}
+        <div class="comment-form">
+          <input type="text" id="cmt-${post.time}" placeholder="匿名留言">
+          <button onclick="addComment(${post.time})">提交</button>
         </div>
-      `).join("");
-    }
+      </div>`;
+    postsDiv.appendChild(postDiv);
+  });
+}
 
-    // 初始化
-    renderPosts();
-  </script>
+function publishPost(){
+  let content=document.getElementById("postContent").value.trim();
+  if(!content) return;
+  let posts=JSON.parse(localStorage.getItem("posts")||"[]");
+  posts.push({content:content,time:Date.now(),comments:[]});
+  localStorage.setItem("posts",JSON.stringify(posts));
+  document.getElementById("postContent").value="";
+  loadPosts();
+}
+
+function addComment(time){
+  let input=document.getElementById("cmt-"+time);
+  let txt=input.value.trim();
+  if(!txt) return;
+  let posts=JSON.parse(localStorage.getItem("posts")||"[]");
+  let post=posts.find(p=>p.time===time);
+  if(post){ post.comments.push(txt); localStorage.setItem("posts",JSON.stringify(posts)); loadPosts(); }
+}
+
+function deletePost(time){
+  if(!confirm("确认删除文章?")) return;
+  let posts=JSON.parse(localStorage.getItem("posts")||"[]");
+  posts = posts.filter(p=>p.time!==time);
+  localStorage.setItem("posts",JSON.stringify(posts));
+  loadPosts();
+}
+
+function editPost(time){
+  let posts=JSON.parse(localStorage.getItem("posts")||"[]");
+  let post=posts.find(p=>p.time===time);
+  if(post){
+    let newContent=prompt("编辑文章内容:",post.content);
+    if(newContent!==null){ post.content=newContent.trim(); localStorage.setItem("posts",JSON.stringify(posts)); loadPosts(); }
+  }
+}
+
+loadPosts();
+</script>
 </body>
 </html>
