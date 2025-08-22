@@ -2,25 +2,32 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>阿当的简易博客 + 留言板</title>
+  <title>简易博客</title>
   <style>
     body { font-family: sans-serif; margin: 20px; }
+    #loginBox { position: absolute; top: 10px; right: 20px; border: 1px solid #aaa; padding: 10px; border-radius: 6px; }
     .hidden { display: none; }
-    .post, .message { border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 8px; }
+    .post { border: 1px solid #ccc; padding: 10px; margin: 20px 0; border-radius: 8px; }
+    .message { border-top: 1px dashed #aaa; margin-top: 5px; padding-top: 5px; }
+    textarea { width: 100%; height: 60px; margin-top: 5px; }
+    input[type="text"], input[type="password"] { width: 160px; }
     h2 { margin-top: 30px; }
-    textarea { width: 100%; height: 60px; }
-    input[type="text"], input[type="password"] { width: 200px; }
   </style>
 </head>
 <body>
-  <h1>阿当的小博客</h1>
+  <h1>我的小博客</h1>
 
-  <!-- 登录 -->
+  <!-- 登录框在右上角 -->
   <div id="loginBox">
-    <h2>登录</h2>
-    <input id="username" type="text" placeholder="账号"><br>
-    <input id="password" type="password" placeholder="密码"><br>
-    <button onclick="login()">登录</button>
+    <div id="loginForm">
+      <input id="username" type="text" placeholder="账号"><br>
+      <input id="password" type="password" placeholder="密码"><br>
+      <button onclick="login()">登录</button>
+    </div>
+    <div id="userPanel" class="hidden">
+      欢迎，<span id="userName"></span>
+      <button onclick="logout()">退出</button>
+    </div>
   </div>
 
   <!-- 发文章 -->
@@ -28,21 +35,14 @@
     <h2>发文章</h2>
     <textarea id="postContent" placeholder="写点什么..."></textarea><br>
     <button onclick="addPost()">发布</button>
-    <button onclick="logout()">退出</button>
   </div>
 
   <!-- 文章列表 -->
   <h2>文章</h2>
   <div id="postList"></div>
 
-  <!-- 匿名留言 -->
-  <h2>匿名留言板</h2>
-  <textarea id="messageContent" placeholder="随便说点什么..."></textarea><br>
-  <button onclick="addMessage()">留言</button>
-  <div id="messageList"></div>
-
   <script>
-    const USERS = { "admin": "Aa@123456" }; // 模拟账号密码
+    const USERS = { "admin": "123456" }; // 模拟账号
     let currentUser = null;
 
     function login() {
@@ -50,7 +50,9 @@
       const pass = document.getElementById("password").value;
       if (USERS[user] && USERS[user] === pass) {
         currentUser = user;
-        document.getElementById("loginBox").classList.add("hidden");
+        document.getElementById("loginForm").classList.add("hidden");
+        document.getElementById("userPanel").classList.remove("hidden");
+        document.getElementById("userName").innerText = user;
         document.getElementById("editor").classList.remove("hidden");
       } else {
         alert("账号或密码错误！");
@@ -59,51 +61,53 @@
 
     function logout() {
       currentUser = null;
-      document.getElementById("loginBox").classList.remove("hidden");
+      document.getElementById("loginForm").classList.remove("hidden");
+      document.getElementById("userPanel").classList.add("hidden");
       document.getElementById("editor").classList.add("hidden");
     }
 
     function addPost() {
       if (!currentUser) return;
-      const content = document.getElementById("postContent").value;
+      const content = document.getElementById("postContent").value.trim();
       if (!content) return;
       const posts = JSON.parse(localStorage.getItem("posts") || "[]");
-      posts.unshift({ user: currentUser, content, time: new Date().toLocaleString() });
+      const id = Date.now();
+      posts.unshift({ id, user: currentUser, content, time: new Date().toLocaleString(), messages: [] });
       localStorage.setItem("posts", JSON.stringify(posts));
       document.getElementById("postContent").value = "";
+      renderPosts();
+    }
+
+    function addMessage(postId) {
+      const input = document.getElementById("msg-" + postId);
+      const text = input.value.trim();
+      if (!text) return;
+      const posts = JSON.parse(localStorage.getItem("posts") || "[]");
+      const post = posts.find(p => p.id === postId);
+      post.messages.unshift({ content: text, time: new Date().toLocaleString() });
+      localStorage.setItem("posts", JSON.stringify(posts));
+      input.value = "";
       renderPosts();
     }
 
     function renderPosts() {
       const posts = JSON.parse(localStorage.getItem("posts") || "[]");
       const list = document.getElementById("postList");
-      list.innerHTML = posts.map(p => 
-        `<div class="post"><b>${p.user}</b> (${p.time})<br>${p.content}</div>`
-      ).join("");
+      list.innerHTML = posts.map(p => `
+        <div class="post">
+          <b>${p.user}</b> (${p.time})<br>${p.content}
+          <div class="messages">
+            <h4>留言</h4>
+            ${p.messages.map(m => `<div class="message">匿名 (${m.time})<br>${m.content}</div>`).join("")}
+            <textarea id="msg-${p.id}" placeholder="匿名留言..."></textarea><br>
+            <button onclick="addMessage(${p.id})">留言</button>
+          </div>
+        </div>
+      `).join("");
     }
 
-    function addMessage() {
-      const content = document.getElementById("messageContent").value;
-      if (!content) return;
-      const msgs = JSON.parse(localStorage.getItem("messages") || "[]");
-      msgs.unshift({ content, time: new Date().toLocaleString() });
-      localStorage.setItem("messages", JSON.stringify(msgs));
-      document.getElementById("messageContent").value = "";
-      renderMessages();
-    }
-
-    function renderMessages() {
-      const msgs = JSON.parse(localStorage.getItem("messages") || "[]");
-      const list = document.getElementById("messageList");
-      list.innerHTML = msgs.map(m => 
-        `<div class="message">匿名 (${m.time})<br>${m.content}</div>`
-      ).join("");
-    }
-
-    // 初始化渲染
+    // 初始化
     renderPosts();
-    renderMessages();
   </script>
 </body>
 </html>
-
