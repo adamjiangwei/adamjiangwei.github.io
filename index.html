@@ -6,509 +6,78 @@
     <title>阿当的博客</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         :root {
             --primary-color: #4361ee;
             --secondary-color: #3f37c9;
             --accent-color: #4cc9f0;
             --light-color: #f8f9fa;
             --dark-color: #212529;
-            --success-color: #4ade80;
-            --danger-color: #f87171;
             --gray-color: #6c757d;
             --border-radius: 8px;
             --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
         }
+        body { background-color: #f5f7fb; color: var(--dark-color); line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-        body {
-            background-color: #f5f7fb;
-            color: var(--dark-color);
-            line-height: 1.6;
-        }
+        /* 导航栏优化 */
+        header { background-color: white; box-shadow: var(--box-shadow); position: sticky; top: 0; z-index: 100; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
+        .logo { font-size: 28px; font-weight: 700; color: var(--primary-color); text-decoration: none; }
+        .user-menu { position: relative; }
+        .user-btn { background: none; border: none; display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 16px; color: var(--dark-color); padding: 8px 16px; border-radius: var(--border-radius); transition: var(--transition); }
+        .user-btn:hover { background-color: #f0f2f5; }
+        .user-dropdown { position: absolute; top: 100%; right: 0; background-color: white; box-shadow: var(--box-shadow); border-radius: var(--border-radius); width: 180px; padding: 10px 0; margin-top: 10px; opacity: 0; visibility: hidden; transform: translateY(10px); transition: var(--transition); z-index: 100; }
+        .user-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
+        .dropdown-item { padding: 10px 20px; display: flex; align-items: center; gap: 10px; color: var(--dark-color); text-decoration: none; transition: var(--transition); }
+        .dropdown-item:hover { background-color: #f0f2f5; }
+        .dropdown-divider { height: 1px; background-color: #e9ecef; margin: 5px 0; }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* 导航栏样式 */
-        header {
-            background-color: white;
-            box-shadow: var(--box-shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-        }
-
-        .logo {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .user-menu {
-            position: relative;
-        }
-
-        .user-btn {
-            background: none;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            color: var(--dark-color);
-            padding: 8px 16px;
-            border-radius: var(--border-radius);
-            transition: var(--transition);
-        }
-
-        .user-btn:hover {
-            background-color: #f0f2f5;
-        }
-
-        .user-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background-color: white;
-            box-shadow: var(--box-shadow);
-            border-radius: var(--border-radius);
-            width: 180px;
-            padding: 10px 0;
-            margin-top: 10px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            transition: var(--transition);
-            z-index: 100;
-        }
-
-        .user-dropdown.active {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .dropdown-item {
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--dark-color);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .dropdown-item:hover {
-            background-color: #f0f2f5;
-        }
-
-        .dropdown-divider {
-            height: 1px;
-            background-color: #e9ecef;
-            margin: 5px 0;
-        }
-
-        /* 主要内容区域 */
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 30px;
-            margin: 40px 0;
-        }
-
-        /* 登录表单样式 */
-        .login-container {
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 30px;
-            max-width: 500px;
-            margin: 50px auto;
-        }
-
-        .login-title {
-            text-align: center;
-            margin-bottom: 30px;
-            color: var(--primary-color);
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            font-size: 16px;
-            transition: var(--transition);
-        }
-
-        .form-control:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 25px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            transition: var(--transition);
-            text-align: center;
-        }
-
-        .btn-block {
-            display: block;
-            width: 100%;
-        }
-
-        .btn:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        /* 文章区域 */
-        .post-form {
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 30px;
-            margin-bottom: 30px;
-        }
-
-        .section-title {
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            font-size: 24px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f2f5;
-        }
-
-        .post-card {
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            overflow: hidden;
-            margin-bottom: 30px;
-            transition: var(--transition);
-        }
-
-        .post-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-        }
-
-        .post-header {
-            padding: 20px;
-            border-bottom: 1px solid #f0f2f5;
-        }
-
-        .post-title {
-            font-size: 22px;
-            margin-bottom: 10px;
-            color: var(--dark-color);
-        }
-
-        .post-meta {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: var(--gray-color);
-            font-size: 14px;
-        }
-
-        .post-content {
-            padding: 20px;
-            font-size: 16px;
-            line-height: 1.8;
-        }
-
-        .post-content img {
-            max-width: 100%;
-            border-radius: var(--border-radius);
-            margin: 15px 0;
-        }
-
-        .post-content a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .post-content a:hover {
-            text-decoration: underline;
-        }
+        /* 内容区域优化 */
+        .main-content { display: grid; grid-template-columns: 1fr 350px; gap: 30px; margin: 40px 0; }
+        .post-form { background-color: white; border-radius: var(--border-radius); box-shadow: var(--box-shadow); padding: 30px; margin-bottom: 30px; }
+        .section-title { margin-bottom: 20px; color: var(--primary-color); font-size: 24px; padding-bottom: 10px; border-bottom: 2px solid #f0f2f5; }
+        .post-card { background-color: white; border-radius: var(--border-radius); box-shadow: var(--box-shadow); overflow: hidden; margin-bottom: 30px; transition: var(--transition); }
+        .post-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); }
+        .post-header { padding: 20px; border-bottom: 1px solid #f0f2f5; }
+        .post-title { font-size: 22px; margin-bottom: 10px; color: var(--dark-color); }
+        .post-meta { display: flex; align-items: center; gap: 15px; color: var(--gray-color); font-size: 14px; }
+        .post-content { padding: 20px; font-size: 16px; line-height: 1.8; }
+        .post-content img { max-width: 100%; border-radius: var(--border-radius); margin: 15px 0; }
+        .post-content a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
+        .post-content a:hover { text-decoration: underline; }
 
         /* 评论区域 */
-        .comments-section {
-            padding: 20px;
-            background-color: #f9fafc;
-            border-top: 1px solid #f0f2f5;
-        }
+        .comments-section { padding: 20px; background-color: #f9fafc; border-top: 1px solid #f0f2f5; }
+        .comment-form { margin-bottom: 30px; }
+        .comment-list { display: flex; flex-direction: column; gap: 20px; }
+        .comment-card { background-color: white; border-radius: var(--border-radius); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); padding: 15px; position: relative; }
+        .comment-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .comment-avatar { width: 32px; height: 32px; border-radius: 50%; background-color: var(--accent-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .comment-author { font-weight: 600; font-size: 15px; }
+        .comment-time { color: var(--gray-color); font-size: 13px; margin-left: auto; }
+        .comment-text { font-size: 15px; line-height: 1.6; color: #495057; }
 
-        .comment-form {
-            margin-bottom: 30px;
-        }
+        /* 侧边栏 */
+        .sidebar { background-color: white; border-radius: var(--border-radius); box-shadow: var(--box-shadow); padding: 25px; align-self: start; position: sticky; top: 100px; }
+        .sidebar-title { font-size: 20px; margin-bottom: 20px; color: var(--primary-color); padding-bottom: 10px; border-bottom: 2px solid #f0f2f5; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .stat-card { background-color: #f8f9ff; border-radius: var(--border-radius); padding: 15px; text-align: center; transition: var(--transition); }
+        .stat-card:hover { transform: translateY(-3px); background-color: #edf0ff; }
+        .stat-value { font-size: 24px; font-weight: 700; color: var(--primary-color); margin-bottom: 5px; }
+        .stat-label { font-size: 14px; color: var(--gray-color); }
+        .info-item { display: flex; gap: 10px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #f0f2f5; }
+        .info-icon { color: var(--primary-color); font-size: 20px; min-width: 24px; }
 
-        .comment-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .comment-card {
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            padding: 15px;
-            position: relative;
-        }
-
-        .comment-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .comment-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: var(--accent-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .comment-author {
-            font-weight: 600;
-            font-size: 15px;
-        }
-
-        .comment-time {
-            color: var(--gray-color);
-            font-size: 13px;
-            margin-left: auto;
-        }
-
-        .comment-text {
-            font-size: 15px;
-            line-height: 1.6;
-            color: #495057;
-        }
-
-        /* 侧边栏样式 */
-        .sidebar {
-            background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 25px;
-            align-self: start;
-            position: sticky;
-            top: 100px;
-        }
-
-        .sidebar-title {
-            font-size: 20px;
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f2f5;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background-color: #f8f9ff;
-            border-radius: var(--border-radius);
-            padding: 15px;
-            text-align: center;
-            transition: var(--transition);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-            background-color: #edf0ff;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--gray-color);
-        }
-
-        .info-item {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #f0f2f5;
-        }
-
-        .info-icon {
-            color: var(--primary-color);
-            font-size: 20px;
-            min-width: 24px;
-        }
-
-        /* 页脚样式 */
-        footer {
-            background-color: var(--dark-color);
-            color: white;
-            padding: 40px 0 20px;
-            margin-top: 50px;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 30px;
-        }
-
-        .footer-section h3 {
-            font-size: 18px;
-            margin-bottom: 20px;
-            position: relative;
-            padding-bottom: 10px;
-        }
-
-        .footer-section h3::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 50px;
-            height: 2px;
-            background-color: var(--accent-color);
-        }
-
-        .footer-links {
-            list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 10px;
-        }
-
-        .footer-links a {
-            color: #adb5bd;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .footer-links a:hover {
-            color: var(--accent-color);
-            padding-left: 5px;
-        }
-
-        .copyright {
-            text-align: center;
-            padding-top: 30px;
-            margin-top: 30px;
-            border-top: 1px solid #495057;
-            color: #6c757d;
-            font-size: 14px;
-        }
-
-        /* 工具提示 */
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-
-        .tooltip .tooltip-text {
-            visibility: hidden;
-            width: 120px;
-            background-color: var(--dark-color);
-            color: white;
-            text-align: center;
-            border-radius: 4px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 12px;
-        }
-
-        .tooltip:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
+        /* 简化页脚 */
+        footer { background-color: var(--dark-color); color: white; padding: 20px 0; margin-top: 50px; text-align: center; }
+        .copyright { font-size: 14px; color: #adb5bd; }
 
         /* 响应式设计 */
         @media (max-width: 992px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .sidebar {
-                position: static;
-            }
-            
-            .footer-content {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .footer-content {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
+            .main-content { grid-template-columns: 1fr; }
+            .sidebar { position: static; }
         }
     </style>
 </head>
@@ -531,52 +100,24 @@
                         <a href="#" class="dropdown-item" id="logoutBtn" style="display:none;">
                             <i class="fas fa-sign-out-alt"></i>退出
                         </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item">
-                            <i class="fas fa-info-circle"></i>关于博客
-                        </a>
                     </div>
                 </div>
             </nav>
         </div>
     </header>
 
-    <!-- 登录表单 -->
-    <div class="container">
-        <div class="login-container" id="loginContainer">
-            <h2 class="login-title">欢迎登录阿当的博客</h2>
-            <div class="form-group">
-                <label for="username">用户名</label>
-                <input type="text" id="username" class="form-control" placeholder="请输入用户名" required>
-            </div>
-            <div class="form-group">
-                <label for="password">密码</label>
-                <input type="password" id="password" class="form-control" placeholder="请输入密码" required>
-            </div>
-            <button type="button" class="btn btn-block" id="loginSubmit">登录</button>
-            <div class="form-group" style="text-align: center; margin-top: 15px;">
-                <small style="color: #6c757d;">测试账号: adam 密码: Aa@123456</small>
-            </div>
-        </div>
-    </div>
-
     <!-- 主要内容区域 -->
     <div class="container" id="mainContent" style="display: none;">
         <div class="main-content">
             <div class="content">
-                <!-- 文章发布表单 -->
-                <div class="post-form">
+                <!-- 文章发布表单（仅登录后显示） -->
+                <div class="post-form" id="postForm" style="display: none;">
                     <h2 class="section-title">发表新文章</h2>
                     <div class="form-group">
-                        <label for="postTitle">文章标题</label>
                         <input type="text" id="postTitle" class="form-control" placeholder="输入文章标题">
                     </div>
                     <div class="form-group">
-                        <label for="postContent">文章内容</label>
                         <textarea id="postContent" class="form-control" rows="6" placeholder="在此输入文章内容..."></textarea>
-                        <small class="tooltip">支持功能
-                            <span class="tooltip-text">图片链接自动显示<br>普通链接可点击</span>
-                        </small>
                     </div>
                     <button type="button" class="btn" id="publishBtn">发布文章</button>
                 </div>
@@ -602,73 +143,24 @@
                     </div>
                 </div>
 
-                <h3 class="sidebar-title">博客信息</h3>
+                <h3 class="sidebar-title">博主信息</h3>
                 <div class="info-item">
                     <div class="info-icon"><i class="fas fa-user"></i></div>
-                    <div>
-                        <strong>博主:</strong> 阿当
-                    </div>
+                    <div>阿当 · 技术博主</div>
                 </div>
                 <div class="info-item">
                     <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
-                    <div>
-                        <strong>创建时间:</strong> 2025-08-22
-                    </div>
-                </div>
-                <div class="info-item">
-                    <div class="info-icon"><i class="fas fa-info-circle"></i></div>
-                    <div>
-                        <strong>博客说明:</strong> 登录后发表文章，支持图片和链接
-                    </div>
-                </div>
-                <div class="info-item">
-                    <div class="info-icon"><i class="fas fa-comment"></i></div>
-                    <div>
-                        <strong>评论规则:</strong> 匿名评论将显示随机三国人名
-                    </div>
+                    <div>专注分享前端技术与开发心得</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 页脚 -->
+    <!-- 简化页脚 -->
     <footer>
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>关于博客</h3>
-                    <p>阿当的博客是一个分享技术、生活和思考的平台。登录后可以发表包含图片和链接的文章，匿名评论功能让交流更加自由。</p>
-                </div>
-                <div class="footer-section">
-                    <h3>快速链接</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">首页</a></li>
-                        <li><a href="#">最新文章</a></li>
-                        <li><a href="#">热门文章</a></li>
-                        <li><a href="#">关于博主</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>博客分类</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">前端技术</a></li>
-                        <li><a href="#">后端开发</a></li>
-                        <li><a href="#">生活随笔</a></li>
-                        <li><a href="#">读书笔记</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>联系我</h3>
-                    <ul class="footer-links">
-                        <li><a href="#"><i class="fas fa-envelope"></i> 邮箱</a></li>
-                        <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
-                        <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
-                        <li><a href="#"><i class="fab fa-weibo"></i> 微博</a></li>
-                    </ul>
-                </div>
-            </div>
             <div class="copyright">
-                &copy; 2025 阿当的博客 | 设计与开发 by Adam
+                &copy; 2025 阿当的博客 | 简洁 · 专注 · 分享
             </div>
         </div>
     </footer>
@@ -679,23 +171,17 @@
             "刘备", "关羽", "张飞", "诸葛亮", "赵云", 
             "曹操", "夏侯惇", "张辽", "司马懿", "许褚",
             "孙权", "周瑜", "鲁肃", "吕蒙", "陆逊",
-            "吕布", "貂蝉", "董卓", "袁绍", "袁术",
-            "马超", "黄忠", "魏延", "法正", "庞统",
-            "典韦", "荀彧", "郭嘉", "贾诩", "徐晃",
-            "太史慈", "甘宁", "黄盖", "程普", "周泰"
+            "吕布", "貂蝉", "董卓", "袁绍", "袁术"
         ];
 
         // DOM元素
         const userBtn = document.getElementById('userBtn');
         const userDropdown = document.getElementById('userDropdown');
         const usernameDisplay = document.getElementById('usernameDisplay');
-        const loginContainer = document.getElementById('loginContainer');
         const mainContent = document.getElementById('mainContent');
         const loginBtn = document.getElementById('loginBtn');
         const logoutBtn = document.getElementById('logoutBtn');
-        const loginSubmit = document.getElementById('loginSubmit');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
+        const postForm = document.getElementById('postForm');
         const publishBtn = document.getElementById('publishBtn');
         const postTitleInput = document.getElementById('postTitle');
         const postContentInput = document.getElementById('postContent');
@@ -712,15 +198,18 @@
 
         // 初始化页面
         function initPage() {
+            // 始终显示内容区域
+            mainContent.style.display = 'block';
+            
             if (blogData.isLoggedIn) {
                 usernameDisplay.textContent = blogData.currentUser;
-                loginContainer.style.display = 'none';
-                mainContent.style.display = 'block';
                 logoutBtn.style.display = 'block';
                 loginBtn.style.display = 'none';
+                postForm.style.display = 'block';
             } else {
                 logoutBtn.style.display = 'none';
                 loginBtn.style.display = 'block';
+                postForm.style.display = 'none';
             }
             renderPosts();
             updateStats();
@@ -734,14 +223,8 @@
         // 登录按钮
         loginBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            loginContainer.style.display = 'block';
-            userDropdown.classList.remove('active');
-        });
-
-        // 提交登录
-        loginSubmit.addEventListener('click', () => {
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value;
+            const username = prompt('请输入用户名：');
+            const password = prompt('请输入密码：');
             
             // 模拟登录验证
             if (username === 'adam' && password === 'Aa@123456') {
@@ -754,17 +237,14 @@
                 
                 // 更新UI
                 usernameDisplay.textContent = username;
-                loginContainer.style.display = 'none';
-                mainContent.style.display = 'block';
                 logoutBtn.style.display = 'block';
                 loginBtn.style.display = 'none';
-                
-                // 清空表单
-                usernameInput.value = '';
-                passwordInput.value = '';
-            } else {
-                alert('用户名或密码错误！\n测试账号: adam 密码: Aa@123456');
+                postForm.style.display = 'block';
+                alert('登录成功！');
+            } else if (username !== null && password !== null) {
+                alert('用户名或密码错误');
             }
+            userDropdown.classList.remove('active');
         });
 
         // 退出登录
@@ -779,11 +259,11 @@
             
             // 更新UI
             usernameDisplay.textContent = '访客';
-            mainContent.style.display = 'none';
-            loginContainer.style.display = 'block';
             logoutBtn.style.display = 'none';
             loginBtn.style.display = 'block';
+            postForm.style.display = 'none';
             userDropdown.classList.remove('active');
+            alert('已退出登录');
         });
 
         // 发布文章
@@ -813,8 +293,6 @@
             // 清空表单
             postTitleInput.value = '';
             postContentInput.value = '';
-            
-            alert('文章发布成功！');
         });
 
         // 渲染文章
@@ -837,12 +315,8 @@
             blogData.posts.forEach(post => {
                 // 自动处理图片链接
                 let processedContent = post.content;
-                
-                // 匹配图片链接并替换为img标签
                 const imgRegex = /(https?:\/\/[^\s]+?\.(?:jpg|jpeg|png|gif|webp))/gi;
                 processedContent = processedContent.replace(imgRegex, '<img src="$1" alt="文章图片">');
-                
-                // 匹配普通链接并替换为a标签
                 const urlRegex = /(https?:\/\/[^\s]+)/gi;
                 processedContent = processedContent.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
                 
@@ -931,7 +405,6 @@
         function updateStats() {
             const totalPosts = blogData.posts.length;
             const totalComments = blogData.posts.reduce((sum, post) => sum + post.comments.length, 0);
-            
             postsCount.textContent = totalPosts;
             commentsCount.textContent = totalComments;
         }
